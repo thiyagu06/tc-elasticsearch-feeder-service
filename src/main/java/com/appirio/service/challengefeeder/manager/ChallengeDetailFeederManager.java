@@ -17,6 +17,8 @@ import com.appirio.service.challengefeeder.dao.ChallengeDetailsFeederDAO;
 import com.appirio.service.challengefeeder.dto.ChallengeFeederParam;
 import com.appirio.service.challengefeeder.util.JestClientUtils;
 import com.appirio.service.challengefeeder.v2.api.ChallengeDetailData;
+import com.appirio.service.challengefeeder.v2.api.RegistrantsData;
+import com.appirio.service.challengefeeder.v2.api.SubmissionData;
 import com.appirio.supply.SupplyException;
 import com.appirio.tech.core.api.v3.request.FieldSelector;
 import com.appirio.tech.core.api.v3.request.FilterParameter;
@@ -131,6 +133,10 @@ public class ChallengeDetailFeederManager {
 			logger.warn("These challenge ids can not be found:" + idsNotFound);
 		}
 		List<ChallengeDetailData> challengeDetails = ChallengeDetailsFeederUtil.buildChallengeDetailData(challenges);
+		
+		List<RegistrantsData> registrantsData =   this.challengeDetailsFeederDAO.getChallengeRegistrants(queryParameter);
+		ChallengeDetailsFeederUtil.associateRegistrantData(challengeDetails, registrantsData);
+		
 		logger.info("aggregating challenge data for " + param.getChallengeIds());
 		try {
             JestClientUtils.pushFeeders(jestClient, param, challengeDetails);

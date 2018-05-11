@@ -1,12 +1,15 @@
 package com.appirio.service.challengefeeder.manager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.appirio.service.challengefeeder.v2.api.ChallengeDetailData;
+import com.appirio.service.challengefeeder.v2.api.RegistrantsData;
 
 public class ChallengeDetailsFeederUtil {
 
@@ -48,6 +51,24 @@ public class ChallengeDetailsFeederUtil {
 
 		return challengeDetailsData;
 
+	}
+	
+	public static void associateRegistrantData(List<ChallengeDetailData> challengeDetails,
+			List<RegistrantsData> registrants) {
+		for (RegistrantsData registrant : registrants) {
+			for (ChallengeDetailData challengeDetailData : challengeDetails) {
+				if (registrant.challengeId().equals(challengeDetailData.getId())) {
+					if (org.springframework.util.CollectionUtils.isEmpty(challengeDetailData.getRegistrants())) {
+						challengeDetailData.setRegistrants(new ArrayList<>());
+					}
+					challengeDetailData.getRegistrants().add(registrant);
+					break;
+				}
+			}
+		}
+		for (RegistrantsData registrant : registrants) {
+			registrant.setChallengeId(null);
+		}
 	}
 
 	@SuppressWarnings("unchecked")

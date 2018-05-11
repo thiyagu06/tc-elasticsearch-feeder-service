@@ -59,6 +59,4 @@ public class SubmissionData extends IdentifiableData{
     private String submitter;
     
     
-
-    
 }

@@ -11,11 +11,13 @@ import lombok.Data;
 @Data
 public class RegistrantsData {
 
+	private Long challengeId;
+	
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
 	@JsonDeserialize(using = CustomDateDeserializer.class)
 	private Date submissionDate;
 	
-	private Double reliability;
+	private int reliability;
 	
 	private String colorStyle;
 	
