@@ -7,6 +7,7 @@ import com.appirio.service.BaseApplication;
 import com.appirio.service.challengefeeder.job.*;
 import com.appirio.service.challengefeeder.resources.HealthCheckResource;
 import com.appirio.service.challengefeeder.util.JestClientUtils;
+import com.appirio.service.resourcefactory.ChallengeDetailsFeederFactory;
 import com.appirio.service.resourcefactory.ChallengeFeederFactory;
 import com.appirio.service.resourcefactory.MmFeederResourceFactory;
 import com.appirio.service.resourcefactory.MarathonMatchFeederFactory;
@@ -131,6 +132,7 @@ public class ChallengeFeederServiceApplication extends BaseApplication<Challenge
         env.jersey().register(new HealthCheckResource());
         env.jersey().register(new MarathonMatchFeederFactory(jestClient).getResourceInstance());
         env.jersey().register(new SRMFeederFactory(jestClient).getResourceInstance());
+        env.jersey().register(new ChallengeDetailsFeederFactory(jestClient).getResourceInstance());
         logger.info("Services registered");
         BaseJob.GLOBAL_CONFIGURATION = config;
     }
