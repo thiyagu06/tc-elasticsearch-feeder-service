@@ -1,14 +1,12 @@
 package com.appirio.service.resourcefactory;
 
-import com.appirio.service.challengefeeder.dao.ChallengeFeederDAO;
 import com.appirio.service.challengefeeder.dao.ChallengeDetailsFeederDAO;
 import com.appirio.service.challengefeeder.manager.ChallengeDetailFeederManager;
-import com.appirio.service.challengefeeder.manager.ChallengeFeederManager;
 import com.appirio.service.challengefeeder.resources.ChallengeDetailsFeederResource;
-import com.appirio.service.challengefeeder.resources.ChallengeFeederResource;
 import com.appirio.service.supply.resources.ResourceFactory;
 import com.appirio.supply.DAOFactory;
 import com.appirio.supply.SupplyException;
+
 import io.searchbox.client.JestClient;
 
 /**
@@ -35,15 +33,15 @@ public class ChallengeDetailsFeederFactory implements ResourceFactory<ChallengeD
     }
 
     /**
-     * Get ChallengeFeederResource object
+     * Get ChallengeDetailsFeederResource object
      *
      * @return ChallengeDetailsFeederResource the challenge details feeder resource
      * @throws SupplyException exception for supply server
      */
     @Override
     public ChallengeDetailsFeederResource getResourceInstance() throws SupplyException {
-        final ChallengeDetailFeederManager challengeManager = new ChallengeDetailFeederManager(jestClient, DAOFactory.getInstance().createDAO(ChallengeDetailsFeederDAO.class));
+        final ChallengeDetailFeederManager challengeDetailsManager = new ChallengeDetailFeederManager(jestClient, DAOFactory.getInstance().createDAO(ChallengeDetailsFeederDAO.class));
 
-        return new ChallengeDetailsFeederResource(challengeManager);
+        return new ChallengeDetailsFeederResource(challengeDetailsManager);
     }
 }

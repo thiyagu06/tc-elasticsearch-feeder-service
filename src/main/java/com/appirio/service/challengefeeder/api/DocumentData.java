@@ -1,7 +1,9 @@
 /**
  * 
  */
-package com.appirio.service.challengefeeder.v2.api;
+package com.appirio.service.challengefeeder.api;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
@@ -15,4 +17,7 @@ public class DocumentData {
 	private String documentName;
 	
 	private String url;
+	
+	@JsonIgnore
+	private Long challengeId;
 }

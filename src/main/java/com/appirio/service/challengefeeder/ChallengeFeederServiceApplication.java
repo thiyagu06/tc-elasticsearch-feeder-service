@@ -161,6 +161,6 @@ public class ChallengeFeederServiceApplication extends BaseApplication<Challenge
         bootstrap.setConfigurationSourceProvider(
                 new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(false)));
         bootstrap.addBundle(new JobsBundle(new StartupJob(), new LoadChangedChallengesJob(),
-                new MarathonMatchesJob(), new SingleRoundMatchesJob(), new LegacyMMToChallengeJob()));
+                new MarathonMatchesJob(), new SingleRoundMatchesJob(), new LegacyMMToChallengeJob(),new LoadChangedChallengeDetailJob()));
     }
 }

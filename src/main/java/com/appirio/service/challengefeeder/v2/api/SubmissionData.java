@@ -5,6 +5,7 @@ import java.util.Date;
 import com.appirio.service.challengefeeder.api.IdentifiableData;
 import com.appirio.service.challengefeeder.helper.CustomDateDeserializer;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import lombok.Data;
@@ -58,5 +59,10 @@ public class SubmissionData extends IdentifiableData{
     
     private String submitter;
     
+    @JsonIgnore
+    private Long challengeId;
+    
+    @JsonIgnore
+    private Double digitalRunPoints;
     
 }

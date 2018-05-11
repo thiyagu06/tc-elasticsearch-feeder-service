@@ -1,4 +1,4 @@
-package com.appirio.service.challengefeeder.v2.api;
+package com.appirio.service.challengefeeder.api;
 
 import java.util.Date;
 

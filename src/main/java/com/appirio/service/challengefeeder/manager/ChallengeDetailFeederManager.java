@@ -5,6 +5,7 @@ package com.appirio.service.challengefeeder.manager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -13,13 +14,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.appirio.service.challengefeeder.api.ChallengeDetailData;
+import com.appirio.service.challengefeeder.api.DocumentData;
+import com.appirio.service.challengefeeder.api.RegistrantsData;
+import com.appirio.service.challengefeeder.api.TermsOfUseData;
 import com.appirio.service.challengefeeder.dao.ChallengeDetailsFeederDAO;
 import com.appirio.service.challengefeeder.dto.ChallengeFeederParam;
 import com.appirio.service.challengefeeder.util.JestClientUtils;
-import com.appirio.service.challengefeeder.v2.api.ChallengeDetailData;
-import com.appirio.service.challengefeeder.v2.api.RegistrantsData;
 import com.appirio.service.challengefeeder.v2.api.SubmissionData;
 import com.appirio.supply.SupplyException;
+import com.appirio.tech.core.api.v3.TCID;
 import com.appirio.tech.core.api.v3.request.FieldSelector;
 import com.appirio.tech.core.api.v3.request.FilterParameter;
 import com.appirio.tech.core.api.v3.request.QueryParameter;
@@ -132,12 +136,26 @@ public class ChallengeDetailFeederManager {
 		if (!idsNotFound.isEmpty()) {
 			logger.warn("These challenge ids can not be found:" + idsNotFound);
 		}
+		
+		logger.info("aggregating challenge details data for " + param.getChallengeIds());
+		
 		List<ChallengeDetailData> challengeDetails = ChallengeDetailsFeederUtil.buildChallengeDetailData(challenges);
 		
 		List<RegistrantsData> registrantsData =   this.challengeDetailsFeederDAO.getChallengeRegistrants(queryParameter);
 		ChallengeDetailsFeederUtil.associateRegistrantData(challengeDetails, registrantsData);
 		
-		logger.info("aggregating challenge data for " + param.getChallengeIds());
+		List<TermsOfUseData> termsOfUseData = this.challengeDetailsFeederDAO.getTerms(queryParameter);
+		ChallengeDetailsFeederUtil.associateAllTermsOfUse(challengeDetails, termsOfUseData);
+		
+		List<SubmissionData> submissionData = this.challengeDetailsFeederDAO.getSubmissions(queryParameter);
+		ChallengeDetailsFeederUtil.associateAllSubmissions(challengeDetails,submissionData);
+		
+		
+		List<DocumentData> documentData = this.challengeDetailsFeederDAO.getDocumentData(queryParameter);
+		ChallengeDetailsFeederUtil.associateDocumentData(challengeDetails, documentData);
+		
+	
+		logger.info("pushing challenge details data to elasticsearch for " + param.getChallengeIds());
 		try {
             JestClientUtils.pushFeeders(jestClient, param, challengeDetails);
         } catch (IOException ioe) {
@@ -147,5 +165,29 @@ public class ChallengeDetailFeederManager {
         }
 
 	}
+	
+	/**
+     * Get timestamp from the persistence
+     *
+     * @throws SupplyException if any error occurs
+     * @return the Date result
+     */
+    public Date getTimestamp() throws SupplyException {
+        return this.challengeDetailsFeederDAO.getTimestamp().getDate();
+    }
+
+    /**
+     * Get changed challenge ids
+     *
+     * @param lastRunTimestamp the lastRunTimestamp to use
+     * @return the List<TCID> result
+     */
+    public List<TCID> getChangedChallengeIds(Date lastRunTimestamp) {
+        if (lastRunTimestamp == null) {
+            throw new IllegalArgumentException("The lastRunTimestamp should be non-null.");
+        }
+        return this.challengeDetailsFeederDAO.getChangedChallengeIds(lastRunTimestamp);
+    }
+    
 
 }

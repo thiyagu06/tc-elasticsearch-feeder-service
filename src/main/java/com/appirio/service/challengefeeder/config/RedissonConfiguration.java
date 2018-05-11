@@ -63,6 +63,16 @@ public class RedissonConfiguration {
     @Getter
     @Setter
     private String srmsIndex;
+
+    /**
+     * The single round match index field
+     */
+    @JsonProperty
+    @NotEmpty
+    @Getter
+    @Setter
+    private String challengeDetailsIndex;
+
     
     /**
      * The challenges type field
@@ -90,6 +100,15 @@ public class RedissonConfiguration {
     @Getter
     @Setter
     private String srmsType;
+    
+    /**
+     * The challenges type field
+     */
+    @JsonProperty
+    @NotEmpty
+    @Getter
+    @Setter
+    private String challengeDetailsType;
     
     /**
      * Represents the batch update size attribute.
@@ -133,6 +152,15 @@ public class RedissonConfiguration {
     private String singleRoundMatchesJobLastRunTimestampPrefix;
     
     /**
+     * Represents the last run timestamp prefix attribute for job LoadChangedChallengeDetailJob.
+     */
+    @JsonProperty
+    @NotEmpty
+    @Getter
+    @Setter
+    private String loadChangedChallengeDetailJobLastRunTimestampPrefix;
+    
+    /**
      * The cluster enabled field
      */
     @JsonProperty
@@ -172,6 +200,15 @@ public class RedissonConfiguration {
     @Getter
     @Setter
     private String singleRoundMatchesJobLockerKeyName;
+    
+    /**
+     * Represents the locker key name attribute for job LoadChangedChallengeDetailJob.
+     */
+    @JsonProperty
+    @NotEmpty
+    @Getter
+    @Setter
+    private String LoadChangedChallengeDetailJobLockerKeyName;
     
     /**
      * Represents the lock watchdog timeout attribute.

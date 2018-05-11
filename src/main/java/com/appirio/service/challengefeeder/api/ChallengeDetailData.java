@@ -1,11 +1,13 @@
 /**
  * 
  */
-package com.appirio.service.challengefeeder.v2.api;
+package com.appirio.service.challengefeeder.api;
 
 import java.util.List;
 
-import com.appirio.service.challengefeeder.api.IdentifiableData;
+import com.appirio.service.challengefeeder.v2.api.SubmissionData;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.annotations.Expose;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,17 +26,19 @@ public class ChallengeDetailData extends IdentifiableData {
 
 	private String finalSubmissionGuidelines;
 
-	private DocumentData document;
+	private List<DocumentData> document;
 
 	private List<RegistrantsData> registrants;
 
-	private List<TermsData> terms;
+	private List<TermsOfUseData> terms;
 
 	private List<CheckpointsData> checkpoints;
 
 	private String snippet;
-	
+
 	private String introduction;
-	
-	private transient boolean isStudio;
+
+	@JsonIgnore
+	@Expose(serialize = false)
+	private boolean isStudio;
 }

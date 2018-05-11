@@ -1,9 +1,10 @@
-package com.appirio.service.challengefeeder.v2.api;
+package com.appirio.service.challengefeeder.api;
 
 import java.util.Date;
 
 import com.appirio.service.challengefeeder.helper.CustomDateDeserializer;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import lombok.Data;
@@ -11,6 +12,7 @@ import lombok.Data;
 @Data
 public class RegistrantsData {
 
+	@JsonIgnore
 	private Long challengeId;
 	
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
