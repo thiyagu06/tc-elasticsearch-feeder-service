@@ -32,6 +32,8 @@ jestClientConfiguration:
   elasticSearchUrl: "${ELASTIC_SEARCH_URL:-http://cockpit.cloud.topcoder.com:9200}"
   # the index name for challenges
   challengesIndexName: "${CHALLENGES_INDEX_NAME:-challenges}"
+  # the index name for challenges
+  challengeDetailsIndexName: "${CHALLENGE_DETAILS_INDEX_NAME:-challenge_details}"
   # the max total connections
   maxTotalConnections: 10
   # connection timeout in milli-seconds

@@ -85,6 +85,14 @@ public class JestClientConfiguration {
     private String awsService; 
     
     /**
+     * The challengeDetailsIndexName
+     */
+    @JsonProperty
+    @Getter
+    @Setter
+    private String challengeDetailsIndexName; 
+    
+    /**
      * Empty constructor
      */
     public JestClientConfiguration() {}
