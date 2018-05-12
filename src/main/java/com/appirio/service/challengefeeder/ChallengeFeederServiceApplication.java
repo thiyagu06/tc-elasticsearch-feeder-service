@@ -47,9 +47,16 @@ import io.searchbox.client.JestClient;
  * <li>Added job for SingleRoundMatchesJob.</li>
  * </ul>
  * </p>
+ * Changes in v1.4 (Topcoder - ElasticSearch Feeder Service - Way To Populate Challenge-Detail Index):
+ * <ul>
+ * <li>Added job for LoadChangedChallengeDetailJob.</li>
+ * <li>Added resources for ChallengeDetails.</li>
+ * <li>Added configuration for ChallengeDetails.</li>
+ * </ul>
+ * </p>
  *
  * @author TCSCODER
- * @version 1.3
+ * @version 1.4
  */
 public class ChallengeFeederServiceApplication extends BaseApplication<ChallengeFeederServiceConfiguration> {
     /**
@@ -78,6 +85,7 @@ public class ChallengeFeederServiceApplication extends BaseApplication<Challenge
         logger.info("\tJestClient configuration");
         logger.info("\t\tElasticSearch URL : " + config.getJestClientConfiguration().getElasticSearchUrl());
         logger.info("\t\tChallenges Index name : " + config.getJestClientConfiguration().getChallengesIndexName());
+        logger.info("\t\tChallenge Details Index name : " + config.getJestClientConfiguration().getChallengeDetailsIndexName());
         logger.info("\t\tMax total connections : " + config.getJestClientConfiguration().getMaxTotalConnections());
         logger.info("\t\tConnection timeout (ms) : " + config.getJestClientConfiguration().getConnTimeout());
         logger.info("\t\tRead timeout (ms) : " + config.getJestClientConfiguration().getReadTimeout());
@@ -88,10 +96,12 @@ public class ChallengeFeederServiceApplication extends BaseApplication<Challenge
         logger.info("\tRedissonConfiguration ");
         logger.info("\t\tChallenges index: " + config.getRedissonConfiguration().getChallengesIndex());
         logger.info("\t\tChallenges type: " + config.getRedissonConfiguration().getChallengesType());
+        logger.info("\t\tChallenge Details type: " + config.getRedissonConfiguration().getChallengeDetailsType());
         logger.info("\t\tSingle server address: " + config.getRedissonConfiguration().getSingleServerAddress());
         logger.info("\t\tLast run timestamp prefix for job LoadChangedChallengesJob: " + config.getRedissonConfiguration().getLoadChangedChallengesJobLastRunTimestampPrefix());
         logger.info("\t\tLast run timestamp prefix for job MarathonMatchesJob: " + config.getRedissonConfiguration().getMarathonMatchesJobLastRunTimestampPrefix());
         logger.info("\t\tLast run timestamp prefix for job SingleRoundMatchesJob: " + config.getRedissonConfiguration().getSingleRoundMatchesJobLastRunTimestampPrefix());
+        logger.info("\t\tLast run timestamp prefix for job LoadChangedChallengeDetailsJob: " + config.getRedissonConfiguration().getLoadChangedChallengeDetailJobLastRunTimestampPrefix());
         logger.info("\t\tCluster enabled: " + config.getRedissonConfiguration().isClusterEnabled());
         logger.info("\t\tLoadChangedChallengesJob Locker key name: " + config.getRedissonConfiguration().getLoadChangedChallengesJobLockerKeyName());
         logger.info("\t\tMarathonMatchesJob Locker key name: " + config.getRedissonConfiguration().getMarathonMatchesJobLockerKeyName());
@@ -132,7 +142,7 @@ public class ChallengeFeederServiceApplication extends BaseApplication<Challenge
         env.jersey().register(new HealthCheckResource());
         env.jersey().register(new MarathonMatchFeederFactory(jestClient).getResourceInstance());
         env.jersey().register(new SRMFeederFactory(jestClient).getResourceInstance());
-        env.jersey().register(new ChallengeDetailsFeederFactory(jestClient).getResourceInstance());
+        env.jersey().register(new ChallengeDetailsFeederFactory(jestClient,config).getResourceInstance());
         logger.info("Services registered");
         BaseJob.GLOBAL_CONFIGURATION = config;
     }

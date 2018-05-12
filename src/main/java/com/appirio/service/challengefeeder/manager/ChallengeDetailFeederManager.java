@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 TopCoder Inc., All Rights Reserved.
+ * Copyright (C) 2018 TopCoder Inc., All Rights Reserved.
  */
 package com.appirio.service.challengefeeder.manager;
 
@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import com.appirio.service.challengefeeder.api.ChallengeDetailData;
 import com.appirio.service.challengefeeder.api.DocumentData;
@@ -30,16 +31,14 @@ import com.appirio.tech.core.api.v3.request.QueryParameter;
 import com.appirio.tech.core.auth.AuthUser;
 
 import io.searchbox.client.JestClient;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * 
- * Version 1.3 - Topcoder - Elasticsearch Service - Populate Challenge Points
- * Prize In Challenges Index - add the methods to associate the prize points for
- * the challenge ids - add the DAO calls to get prize points for the challenge
- * ids.
+ * The challenge Detail Feeder manager to handle challenge details feedera.
  * 
  * @author TCSCODER
- * @version 1.3
+ * @version 1.0
  */
 public class ChallengeDetailFeederManager {
 
@@ -47,11 +46,6 @@ public class ChallengeDetailFeederManager {
 	 * Logger used to log events
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(ChallengeDetailFeederManager.class);
-
-	/**
-	 * MM Round id project_info_type_id
-	 */
-	private static final long MM_PROPERTY_ID = 56;
 
 	/**
 	 * DAO to access challenge data from the transactional database.
@@ -62,6 +56,13 @@ public class ChallengeDetailFeederManager {
 	 * The jestClient field
 	 */
 	private final JestClient jestClient;
+
+	/**
+	 * The root domain to be used for submission image url
+	 */
+	@Getter
+	@Setter
+	private String rootDomain;
 
 	/**
 	 * Create ChallengeFeederManager
@@ -77,7 +78,7 @@ public class ChallengeDetailFeederManager {
 	}
 
 	/**
-	 * Push challenge feeder
+	 * Push challenge details feeder
 	 *
 	 * @param authUser
 	 *            the authUser to use
@@ -86,20 +87,20 @@ public class ChallengeDetailFeederManager {
 	 * @throws SupplyException
 	 *             if any error occurs
 	 */
-	public void pushChallengeFeeder(AuthUser authUser, ChallengeFeederParam param) throws SupplyException {
+	public void pushChallengeDetailsFeeder(AuthUser authUser, ChallengeFeederParam param) throws SupplyException {
 		logger.info("Enter of pushChallengeFeeder");
-		this.pushChallengeFeeder(param);
+		this.pushChallengeDetailsFeeder(param);
 	}
 
 	/**
-	 * Push challenge feeder
+	 * Push challenge details feeder
 	 *
 	 * @param param
 	 *            the challenge feeders param to use
 	 * @throws SupplyException
 	 *             if any error occurs
 	 */
-	public void pushChallengeFeeder(ChallengeFeederParam param) throws SupplyException {
+	public void pushChallengeDetailsFeeder(ChallengeFeederParam param) throws SupplyException {
 		if (param.getType() == null || param.getType().trim().length() == 0) {
 			param.setType("challenges");
 		}
@@ -136,58 +137,92 @@ public class ChallengeDetailFeederManager {
 		if (!idsNotFound.isEmpty()) {
 			logger.warn("These challenge ids can not be found:" + idsNotFound);
 		}
-		
+
 		logger.info("aggregating challenge details data for " + param.getChallengeIds());
-		
+
 		List<ChallengeDetailData> challengeDetails = ChallengeDetailsFeederUtil.buildChallengeDetailData(challenges);
-		
-		List<RegistrantsData> registrantsData =   this.challengeDetailsFeederDAO.getChallengeRegistrants(queryParameter);
+
+		List<RegistrantsData> registrantsData = this.challengeDetailsFeederDAO.getChallengeRegistrants(queryParameter);
 		ChallengeDetailsFeederUtil.associateRegistrantData(challengeDetails, registrantsData);
-		
+
 		List<TermsOfUseData> termsOfUseData = this.challengeDetailsFeederDAO.getTerms(queryParameter);
 		ChallengeDetailsFeederUtil.associateAllTermsOfUse(challengeDetails, termsOfUseData);
-		
-		List<SubmissionData> submissionData = this.challengeDetailsFeederDAO.getSubmissions(queryParameter);
-		ChallengeDetailsFeederUtil.associateAllSubmissions(challengeDetails,submissionData);
-		
-		
+
+		List<Long> studioTypeChallengeIds = ChallengeDetailsFeederUtil.getStudioTypeChallengeIds(challengeDetails);
+		if (!CollectionUtils.isEmpty(studioTypeChallengeIds)) {
+			FilterParameter studioChallengeIdFilter = new FilterParameter(
+					"challengeIds=in(" + ChallengeFeederUtil.listAsString(studioTypeChallengeIds) + ")");
+			QueryParameter studioChallengeIdFilterParam = new QueryParameter(new FieldSelector());
+			studioChallengeIdFilterParam.setFilter(studioChallengeIdFilter);
+			List<SubmissionData> submissions = this.challengeDetailsFeederDAO
+					.getStudioChallengeDetailSubmissions(studioChallengeIdFilterParam, 1);
+			List<SubmissionData> checkpoints = this.challengeDetailsFeederDAO
+					.getStudioChallengeDetailSubmissions(studioChallengeIdFilterParam, 3);
+			ChallengeDetailsFeederUtil.associateAllSubmissions(challengeDetails, submissions);
+			ChallengeDetailsFeederUtil.associateAllCheckpoints(challengeDetails, checkpoints);
+		}
+
+		List<Long> nonStudioTypeChallengeIds = ChallengeDetailsFeederUtil
+				.getNonStudioTypeChallengeIds(challengeDetails);
+		if (!CollectionUtils.isEmpty(nonStudioTypeChallengeIds)) {
+			FilterParameter nonStudioChallengeIdFilter = new FilterParameter(
+					"challengeIds=in(" + ChallengeFeederUtil.listAsString(nonStudioTypeChallengeIds) + ")");
+			QueryParameter nonStudioChallengeIdFilterParam = new QueryParameter(new FieldSelector());
+			nonStudioChallengeIdFilterParam.setFilter(nonStudioChallengeIdFilter);
+			List<SubmissionData> submissions = this.challengeDetailsFeederDAO
+					.getChallengeSubmissionsForChallengeDetails(queryParameter, 1);
+			List<SubmissionData> checkpoints = this.challengeDetailsFeederDAO
+					.getChallengeSubmissionsForChallengeDetails(queryParameter, 3);
+			ChallengeDetailsFeederUtil.associateAllSubmissions(challengeDetails, submissions);
+			ChallengeDetailsFeederUtil.associateAllCheckpoints(challengeDetails, checkpoints);
+		}
+
+		List<Map<String, Object>> resultRows = challengeDetailsFeederDAO.getSubmissionIdsWithImages(queryParameter);
+		// Marshalling
+		List<Long> resultAsLong = new ArrayList<>();
+		for (Map<String, Object> resultRow : resultRows)
+			resultAsLong.add(Long.parseLong(resultRow.get("id").toString()));
+
+		ChallengeDetailsFeederUtil.associateSubmssionImageWithChallengeSubmissions(challengeDetails, resultAsLong,
+				this.rootDomain);
+
 		List<DocumentData> documentData = this.challengeDetailsFeederDAO.getDocumentData(queryParameter);
 		ChallengeDetailsFeederUtil.associateDocumentData(challengeDetails, documentData);
-		
-	
+
 		logger.info("pushing challenge details data to elasticsearch for " + param.getChallengeIds());
 		try {
-            JestClientUtils.pushFeeders(jestClient, param, challengeDetails);
-        } catch (IOException ioe) {
-            SupplyException se = new SupplyException("Internal server error occurs", ioe);
-            se.setStatusCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            throw se;
-        }
+			JestClientUtils.pushFeeders(jestClient, param, challengeDetails);
+		} catch (IOException ioe) {
+			SupplyException se = new SupplyException("Internal server error occurs", ioe);
+			se.setStatusCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw se;
+		}
 
 	}
-	
-	/**
-     * Get timestamp from the persistence
-     *
-     * @throws SupplyException if any error occurs
-     * @return the Date result
-     */
-    public Date getTimestamp() throws SupplyException {
-        return this.challengeDetailsFeederDAO.getTimestamp().getDate();
-    }
 
-    /**
-     * Get changed challenge ids
-     *
-     * @param lastRunTimestamp the lastRunTimestamp to use
-     * @return the List<TCID> result
-     */
-    public List<TCID> getChangedChallengeIds(Date lastRunTimestamp) {
-        if (lastRunTimestamp == null) {
-            throw new IllegalArgumentException("The lastRunTimestamp should be non-null.");
-        }
-        return this.challengeDetailsFeederDAO.getChangedChallengeIds(lastRunTimestamp);
-    }
-    
+	/**
+	 * Get timestamp from the persistence
+	 *
+	 * @throws SupplyException
+	 *             if any error occurs
+	 * @return the Date result
+	 */
+	public Date getTimestamp() throws SupplyException {
+		return this.challengeDetailsFeederDAO.getTimestamp().getDate();
+	}
+
+	/**
+	 * Get changed challenge ids
+	 *
+	 * @param lastRunTimestamp
+	 *            the lastRunTimestamp to use
+	 * @return the List<TCID> result
+	 */
+	public List<TCID> getChangedChallengeIds(Date lastRunTimestamp) {
+		if (lastRunTimestamp == null) {
+			throw new IllegalArgumentException("The lastRunTimestamp should be non-null.");
+		}
+		return this.challengeDetailsFeederDAO.getChangedChallengeIds(lastRunTimestamp);
+	}
 
 }

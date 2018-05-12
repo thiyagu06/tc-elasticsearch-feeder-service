@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 TopCoder Inc., All Rights Reserved.
+ * Copyright (C) 2018 TopCoder Inc., All Rights Reserved.
  */
 package com.appirio.service.challengefeeder.dao;
 
@@ -22,11 +22,6 @@ import com.appirio.tech.core.api.v3.request.QueryParameter;
 
 /**
  * DAO to interact with challenge details data
- *
- * Version 1.0 - Topcoder - Create CronJob For Populating Changed Challenges To
- * Elasticsearch v1.0 - add the methods to get the changed challenge ids and
- * current timestamp
- * 
  * 
  * @author TCCODER
  * @version 1.0
@@ -43,8 +38,7 @@ public interface ChallengeDetailsFeederDAO {
 	 */
 	@SqlQueryFile("sql/challenge-feeder/challenge_details/challenge_details.sql")
 	List<Map<String, Object>> getChallenges(@ApiQueryInput QueryParameter queryParameter);
-	
-	
+
 	/**
 	 * Get challenge registrants data
 	 *
@@ -54,44 +48,71 @@ public interface ChallengeDetailsFeederDAO {
 	 */
 	@SqlQueryFile("sql/challenge-feeder/challenge_details/challenge_registrants.sql")
 	List<RegistrantsData> getChallengeRegistrants(@ApiQueryInput QueryParameter queryParameter);
-	
-	 /**
-     * Get terms 
-     *
-     * @param queryParameter the queryParameter to use
-     * @return the result
-     */
-    @SqlQueryFile("sql/challenge-feeder/challenge_details/get_terms.sql")
-    List<TermsOfUseData> getTerms(@ApiQueryInput QueryParameter queryParameter);
-   
-    /**
-     * Get submissions 
-     *
-     * @param queryParameter the queryParameter to use
-     * @return the result
-     */
-    @SqlQueryFile("sql/challenge-feeder/challenge_details/get_submissions.sql")
-    List<SubmissionData> getSubmissions(@ApiQueryInput QueryParameter queryParameter);
-    
-    @SqlQueryFile("sql/challenge-feeder/challenge_details/challenge_documents.sql")
-    List<DocumentData> getDocumentData(@ApiQueryInput QueryParameter queryParameter);
-    
-    /**
-     * Get timestamp 
-     *
-     * @param queryParameter the queryParameter to use
-     * @return the result
-     */
-    @SqlQueryFile("sql/challenge-feeder/job/get_timestamp.sql")
-    DatabaseTimestamp getTimestamp();
 
+	/**
+	 * Get challenge terms data
+	 *
+	 * @param queryParameter
+	 *            the queryParameter to use
+	 * @return the result
+	 */
+	@SqlQueryFile("sql/challenge-feeder/challenge_details/get_terms.sql")
+	List<TermsOfUseData> getTerms(@ApiQueryInput QueryParameter queryParameter);
+
+	/**
+	 * Get challenge submissions data
+	 *
+	 * @param queryParameter
+	 *            the queryParameter to use
+	 * @return the result
+	 */
+	@SqlQueryFile("sql/challenge-feeder/challenge_details/get_submissions.sql")
+	List<SubmissionData> getSubmissions(@ApiQueryInput QueryParameter queryParameter);
+
+	@SqlQueryFile("sql/challenge-feeder/challenge_details/challenge_documents.sql")
+	List<DocumentData> getDocumentData(@ApiQueryInput QueryParameter queryParameter);
+
+	/**
+	 * Get timestamp of the database
+	 *
+	 * @param queryParameter
+	 *            the queryParameter to use
+	 * @return the result
+	 */
+	@SqlQueryFile("sql/challenge-feeder/job/get_timestamp.sql")
+	DatabaseTimestamp getTimestamp();
+
+	/**
+	 * Get changed challenge ids based on timestamp
+	 *
+	 * @param lastRunTimestamp
+	 *            the lastRunTimestamp to use
+	 * @return the List<TCID> result
+	 */
+	@SqlQueryFile("sql/challenge-feeder/job/get_changed_challenge_ids.sql")
+	List<TCID> getChangedChallengeIds(@Bind("lastRunTimestamp") Date lastRunTimestamp);
+	
+	/**
+     * Get challenge submissions for challenge details
+     *
+     * @param challengeId the challengeId to use
+     * @param submissionType the submissionType to use
+     * @return the result
+     */
+    @SqlQueryFile("sql/challenge-feeder/challenge_details/challenge_submissions_for_challenge_details.sql")
+    List<SubmissionData> getChallengeSubmissionsForChallengeDetails(@ApiQueryInput QueryParameter queryParameter, @Bind("submissionType") long submissionType);
     
     /**
-     * Get changed challenge ids
+     * Get studio challenge detail submissions 
      *
-     * @param lastRunTimestamp the lastRunTimestamp to use
-     * @return the List<TCID> result
+     * @param challengeId the challengeId to use
+     * @param submssionTypeId the submssionTypeId to use
+     * @return the result
      */
-    @SqlQueryFile("sql/challenge-feeder/job/get_changed_challenge_ids.sql")
-    List<TCID> getChangedChallengeIds(@Bind("lastRunTimestamp") Date lastRunTimestamp);
+    @SqlQueryFile("sql/challenge-feeder/challenge_details/get_studio_challenge_detail_submissions.sql")
+    List<SubmissionData> getStudioChallengeDetailSubmissions(@ApiQueryInput QueryParameter queryParameter, @Bind("submssionTypeId") long submssionTypeId);
+
+    @SqlQueryFile("sql/challenge-feeder/challenge_details/get-design-submission-ids.sql")
+    List<Map<String, Object>> getSubmissionIdsWithImages(@ApiQueryInput QueryParameter queryParameter);
+
 }

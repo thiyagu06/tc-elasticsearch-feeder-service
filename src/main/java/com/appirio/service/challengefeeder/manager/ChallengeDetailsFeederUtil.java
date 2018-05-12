@@ -1,8 +1,12 @@
+/*
+ * Copyright (C) 2018 TopCoder Inc., All Rights Reserved.
+ */
 package com.appirio.service.challengefeeder.manager;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -11,11 +15,22 @@ import com.appirio.service.challengefeeder.api.ChallengeDetailData;
 import com.appirio.service.challengefeeder.api.CheckpointsData;
 import com.appirio.service.challengefeeder.api.DocumentData;
 import com.appirio.service.challengefeeder.api.RegistrantsData;
+import com.appirio.service.challengefeeder.api.SubmissionImage;
 import com.appirio.service.challengefeeder.api.TermsOfUseData;
 import com.appirio.service.challengefeeder.v2.api.SubmissionData;
 
+/**
+ * ChallengeDetailsFeederUtil provides common methods such as associating the
+ * challenge details data.
+ * 
+ * @author TCSCODER
+ * @version 1.0
+ */
 public class ChallengeDetailsFeederUtil {
 
+	/**
+	 * private constructor to avoid object creation for static class
+	 */
 	private ChallengeDetailsFeederUtil() {
 
 	}
@@ -26,6 +41,12 @@ public class ChallengeDetailsFeederUtil {
 	private static final double[][] DR_POINT = new double[][] { { 1 }, { 0.7, 0.3 }, { 0.65, 0.25, 0.10 },
 			{ 0.6, 0.22, 0.1, 0.08 }, { 0.56, 0.2, 0.1, 0.08, 0.06 } };
 
+	/**
+	 * Method to build challenge details model from DAO returned data.
+	 * 
+	 * @param challengeDetails
+	 * @return list of challenge details
+	 */
 	public static List<ChallengeDetailData> buildChallengeDetailData(List<Map<String, Object>> challengeDetails) {
 		List<ChallengeDetailData> challengeDetailsData = new ArrayList<>();
 		for (Map<String, Object> challengeDetail : challengeDetails) {
@@ -61,6 +82,14 @@ public class ChallengeDetailsFeederUtil {
 
 	}
 
+	/**
+	 * Associate all the registrants data to challenges
+	 * 
+	 * @param challengeDetails
+	 *            the challenges to use
+	 * @param registrants
+	 *            the registrants to use
+	 */
 	public static void associateRegistrantData(List<ChallengeDetailData> challengeDetails,
 			List<RegistrantsData> registrants) {
 		for (RegistrantsData registrant : registrants) {
@@ -129,7 +158,7 @@ public class ChallengeDetailsFeederUtil {
 			item.setChallengeId(null);
 		}
 	}
-	
+
 	/**
 	 * Associate all submissions
 	 *
@@ -147,7 +176,7 @@ public class ChallengeDetailsFeederUtil {
 					}
 					CheckpointsData checkpointsData = new CheckpointsData();
 					checkpointsData.setSubmissionId(item.getSubmissionId());
-					checkpointsData.setSubmissionTime(item.getSubmissionTime());
+					checkpointsData.setSubmissionTime(item.getSubmissionDate());
 					checkpointsData.setSubmitter(item.getSubmitter());
 					challenge.getCheckpoints().add(checkpointsData);
 					break;
@@ -158,9 +187,7 @@ public class ChallengeDetailsFeederUtil {
 			item.setChallengeId(null);
 		}
 	}
-	
-	
-	
+
 	/**
 	 * Associate all submissions
 	 *
@@ -186,21 +213,68 @@ public class ChallengeDetailsFeederUtil {
 		}
 	}
 
-	private static void calculatePoints(SubmissionData item) {
+	/**
+	 * The method to calculate points for submission.
+	 * 
+	 * @param submissionData
+	 */
+	private static void calculatePoints(SubmissionData submissionData) {
 		int passedReview = 0;
-		Integer placement = item.getPlacement();
+		Integer placement = submissionData.getPlacement();
 		if (placement != null) {
 			passedReview++;
 		}
 		double[] drTable = DR_POINT[passedReview - 1 < 4 ? passedReview : 4];
-		Double digitalRunPoints = item.getDigitalRunPoints();
+		Double digitalRunPoints = submissionData.getDigitalRunPoints();
 		if (placement != null && drTable.length > placement) {
 			Double points = drTable[Integer.parseInt(placement.toString()) - 1] * digitalRunPoints;
-			item.setPoints(points);
+			submissionData.setPoints(points);
 		}
 
 	}
+	
+	public static List<Long> getStudioTypeChallengeIds(List<ChallengeDetailData> challengeDetails) {
+		List<Long> challengeIds = challengeDetails.stream().filter(challengeDetail -> challengeDetail.isStudio())
+				.map(ChallengeDetailData::getId).collect(Collectors.toList());
+		return challengeIds;
+	}
+	
+	public static List<Long> getNonStudioTypeChallengeIds(List<ChallengeDetailData> challengeDetails) {
+		List<Long> challengeIds = challengeDetails.stream().filter(challengeDetail -> !challengeDetail.isStudio())
+				.map(ChallengeDetailData::getId).collect(Collectors.toList());
+		return challengeIds;
+	}
+	
+	public static void associateSubmssionImageWithChallengeSubmissions(List<ChallengeDetailData> challengeDetails, List<Long> submissionIdsWithImages,String rootDomain){
+		        for(ChallengeDetailData challengeDetailData : challengeDetails){
+		        	for(SubmissionData submissionData : challengeDetailData.getSubmissions()){
+		        		if(submissionIdsWithImages.contains(submissionData.getSubmissionId())){
+		        			submissionData.setSubmissionImage(generateSubmissionImageUrls(rootDomain,submissionData.getSubmissionId()));
+		        		}
+		        	}
+		        }
+	}
 
+
+	 private static SubmissionImage generateSubmissionImageUrls(String rootDomain,Long submissionId) {
+	        String templateUrl = String.format("//studio.%s/studio.jpg?module=DownloadSubmission&sbmid=%s", rootDomain.trim(), submissionId);
+
+	        String tinyImage = String.format("%s&sbt=tiny", templateUrl);
+	        String smallImage = String.format("%s&sbt=small", templateUrl);
+	        String mediumImage = String.format("%s&sbt=medium", templateUrl);
+	        String fullImage = String.format("%s&sbt=full", templateUrl);
+	        String thumbImage = String.format("%s&sbt=thumb", templateUrl);
+
+	        SubmissionImage submissionImage = new SubmissionImage();
+	        submissionImage.setPreviewPackage(templateUrl);
+	        submissionImage.setTiny(tinyImage);
+	        submissionImage.setSmall(smallImage);
+	        submissionImage.setMedium(mediumImage);
+	        submissionImage.setThumb(thumbImage);
+	        submissionImage.setFull(fullImage);
+
+	        return submissionImage;
+	    }
 	@SuppressWarnings("unchecked")
 	private static <T> T CastObjectToTargetType(Object source, Class<T> clazz) {
 		if (source != null)

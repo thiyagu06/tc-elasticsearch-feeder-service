@@ -1,68 +1,94 @@
+/*
+ * Copyright (C) 2018 TopCoder Inc., All Rights Reserved.
+ */
 package com.appirio.service.challengefeeder.v2.api;
 
 import java.util.Date;
 
-import com.appirio.service.challengefeeder.api.IdentifiableData;
+import com.appirio.service.challengefeeder.api.SubmissionImage;
 import com.appirio.service.challengefeeder.helper.CustomDateDeserializer;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
+/**
+ * The submission Data field
+ * 
+ * @author Thiyagu
+ *
+ */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class SubmissionData extends IdentifiableData{
+public class SubmissionData {
 
-	 /**
-     * The status field
-     */
-    private String status;
-    
-    
-    private Double score;
-    
-    /**
-     * The placement field
-     */
-    private Integer placement;
-    
-    
-    private String submissionImage;
-    
-    
-    /**
-     * The submissionTime field
-     */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    @JsonDeserialize(using = CustomDateDeserializer.class)
-    private Date submissionTime;
-    
-    private String handle;
-    
-    private Double screeningScore;
-    
-    private Double initialScore;
-    
-    private Double finalScore;
-    
-    private Double points;
-    
-    private String submissionStatus;
-    
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    @JsonDeserialize(using = CustomDateDeserializer.class)
-    private Date submissionDate;
-    
-    private Long submissionId;
-    
-    private String submitter;
-    
-    @JsonIgnore
-    private Long challengeId;
-    
-    @JsonIgnore
-    private Double digitalRunPoints;
-    
+	/**
+	 * The placement field
+	 */
+	private Integer placement;
+
+	/**
+	 * The submission image field. applicable only for studio challenges
+	 */
+	private SubmissionImage submissionImage;
+
+	/**
+	 * The handle field
+	 */
+	private String handle;
+
+	/**
+	 * The screening score field
+	 */
+	private Double screeningScore;
+
+	/**
+	 * The initial score field
+	 */
+	private Double initialScore;
+
+	/**
+	 * The final score field
+	 */
+	private Double finalScore;
+
+	/**
+	 * The points field
+	 */
+	private Double points;
+
+	/**
+	 * The submission Status field
+	 */
+	private String submissionStatus;
+
+	/**
+	 * The submission Date field
+	 */
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+	@JsonDeserialize(using = CustomDateDeserializer.class)
+	private Date submissionDate;
+
+	/**
+	 * The submission id field
+	 */
+	private Long submissionId;
+
+	/**
+	 * The submitter field
+	 */
+	private String submitter;
+
+	/**
+	 * The challenge id field
+	 */
+	@JsonIgnore
+	private Long challengeId;
+
+	/**
+	 * The digital run points field used only for points calculation.
+	 */
+	@JsonIgnore
+	private Double digitalRunPoints;
+
 }

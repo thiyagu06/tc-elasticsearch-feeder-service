@@ -31,8 +31,6 @@ import de.spinscale.dropwizard.jobs.annotations.Every;
 /**
  * LoadChangedChallengeDetailJob is used to load the changed challenge details.
  * 
- * It's added in Topcoder - Create CronJob For Populating Changed Challenge details To Elasticsearch v1.0
- * 
  * @author TCCoder
  * @version 1.0
  *
@@ -100,7 +98,7 @@ public class LoadChangedChallengeDetailJob extends BaseJob {
             redisson = Redisson.create(redissonConfig);
             lock = redisson.getLock(config.getRedissonConfiguration().getLoadChangedChallengesJobLockerKeyName());
             if (lock.tryLock()) {
-                logger.info("Get the lock for challenges job successfully");
+                logger.info("Get the lock for challenge details job successfully");
                 try {
                     RMapCache<String, String> mapCache = redisson.getMapCache(config.getRedissonConfiguration().getLoadChangedChallengesJobLastRunTimestampPrefix());
 
@@ -111,7 +109,7 @@ public class LoadChangedChallengeDetailJob extends BaseJob {
                         lastRunTimestamp = DATE_FORMAT.parse(timestamp);
                     }
 
-                    logger.info("The last run timestamp for challenges job is:" + timestamp);
+                    logger.info("The last run timestamp for challenge details job is:" + timestamp);
 
                     String currentTime = DATE_FORMAT.format(this.challengeDetailsFeederManager.getTimestamp());
 
@@ -135,7 +133,7 @@ public class LoadChangedChallengeDetailJob extends BaseJob {
                         param.setType(this.config.getRedissonConfiguration().getChallengesType());
                         param.setChallengeIds(sub);
                         try {
-                            this.challengeDetailsFeederManager.pushChallengeFeeder(param);
+                            this.challengeDetailsFeederManager.pushChallengeDetailsFeeder(param);
                         } catch (Exception e) {
                             // ignore all exception
                             e.printStackTrace();
@@ -144,14 +142,14 @@ public class LoadChangedChallengeDetailJob extends BaseJob {
                         from = to;
                     }
 
-                    logger.info("update last run timestamp for challenges job is:" + currentTime);
+                    logger.info("update last run timestamp for challenge details job is:" + currentTime);
                     mapCache.put(config.getRedissonConfiguration().getLoadChangedChallengesJobLastRunTimestampPrefix(), currentTime);
                 } finally {
-                    logger.info("release the lock for challenges job");
+                    logger.info("release the lock for challenge details job");
                     lock.unlock();
                 }
             } else {
-                logger.warn("the previous challenges job is still running");
+                logger.warn("the previous challenge details job is still running");
             }
         } catch (Exception exp) {
             exp.printStackTrace();

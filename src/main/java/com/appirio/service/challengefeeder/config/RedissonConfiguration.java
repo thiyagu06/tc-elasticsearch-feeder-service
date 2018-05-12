@@ -24,8 +24,14 @@ import lombok.Setter;
  * <li>Added reference to job SingleRoundMatchesJob.</li>
  * </ul>
  * 
+ * <p>
+ * Changes in v1.2 (Topcoder - ElasticSearch Feeder Service - Way To Populate Challenge-Detail Index):
+ * <ul>
+ * <li>Added configuration for LoadChangedChallengeDetailJob</li>
+ * </ul>
+ * 
  * @author TCCoder
- * @version 1.1
+ * @version 1.2
  */
 public class RedissonConfiguration {
     
@@ -65,7 +71,7 @@ public class RedissonConfiguration {
     private String srmsIndex;
 
     /**
-     * The single round match index field
+     * The challenge details index field
      */
     @JsonProperty
     @NotEmpty

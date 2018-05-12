@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 TopCoder Inc., All Rights Reserved.
+ * Copyright (C) 2018 TopCoder Inc., All Rights Reserved.
  */
 package com.appirio.service.challengefeeder;
 
@@ -10,6 +10,8 @@ import com.appirio.service.supply.resources.SupplyDatasourceFactory;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.spinscale.dropwizard.jobs.JobConfiguration;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -22,9 +24,12 @@ import java.util.Map;
  *
  * Version 1.1 - Topcoder - Create CronJob For Populating Changed Challenges To Elasticsearch v1.0
  * - add the cron job related configuration
+ *
+ * Version 1.2 - Topcoder - ElasticSearch Feeder Service - Way To Populate Challenge-Detail Index
+ * - add the auth Domain property
  * 
  * @author TCSCODER
- * @version 1.1 
+ * @version 1.2
  */
 public class ChallengeFeederServiceConfiguration extends BaseAppConfiguration implements JobConfiguration {
 
@@ -55,6 +60,14 @@ public class ChallengeFeederServiceConfiguration extends BaseAppConfiguration im
      */
     @JsonProperty("redissonConfiguration")
     private RedissonConfiguration redissonConfiguration;
+    
+    /**
+     *  The authDomain property.
+     */
+    @Getter
+    @Setter
+    @JsonProperty("authDomain")
+    private String authDomain;
 
     /**
      * Get the data source factory

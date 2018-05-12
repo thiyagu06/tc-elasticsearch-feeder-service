@@ -1,5 +1,6 @@
 package com.appirio.service.resourcefactory;
 
+import com.appirio.service.challengefeeder.ChallengeFeederServiceConfiguration;
 import com.appirio.service.challengefeeder.dao.ChallengeDetailsFeederDAO;
 import com.appirio.service.challengefeeder.manager.ChallengeDetailFeederManager;
 import com.appirio.service.challengefeeder.resources.ChallengeDetailsFeederResource;
@@ -22,14 +23,17 @@ public class ChallengeDetailsFeederFactory implements ResourceFactory<ChallengeD
      * The jest client
      */
     private final JestClient jestClient;
+    
+    private final ChallengeFeederServiceConfiguration config;
 
     /**
      * Simple constructor
      * 
      * @param jestClient the jest client
      */
-    public ChallengeDetailsFeederFactory(JestClient jestClient) {
+    public ChallengeDetailsFeederFactory(JestClient jestClient,ChallengeFeederServiceConfiguration config) {
         this.jestClient = jestClient;
+        this.config = config;
     }
 
     /**
@@ -41,7 +45,7 @@ public class ChallengeDetailsFeederFactory implements ResourceFactory<ChallengeD
     @Override
     public ChallengeDetailsFeederResource getResourceInstance() throws SupplyException {
         final ChallengeDetailFeederManager challengeDetailsManager = new ChallengeDetailFeederManager(jestClient, DAOFactory.getInstance().createDAO(ChallengeDetailsFeederDAO.class));
-
+        challengeDetailsManager.setRootDomain(config.getAuthDomain());
         return new ChallengeDetailsFeederResource(challengeDetailsManager);
     }
 }
